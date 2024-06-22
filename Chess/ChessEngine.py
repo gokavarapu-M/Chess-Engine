@@ -33,6 +33,9 @@ class GameState():
         self.movelog = []
         self.whiteKingLocation = (7,4)
         self.blackKingLocation = (0,4)
+        self.checkMate = False
+        self.staleMate = False
+
 
     # takes a move as a parameter and executes it (this will not work for castling, pawn promotion and en-passant)
     def makeMove(self,move):
@@ -81,6 +84,14 @@ class GameState():
                 moves.remove(moves[i]) #if in check, remove the move
             self.whiteToMove = not self.whiteToMove
             self.undoMove()
+        if len(moves) == 0:
+            if self.inCheck():
+                self.checkMate = True
+            else:
+                self.staleMate = True
+        else:
+            self.checkMate = False
+            self.staleMate = False
         return moves
 
     #checks if the current player is in check
