@@ -109,6 +109,7 @@ class GameState():
             self.castleRightsLog.pop() #poping new castle rights
             newRights =  self.castleRightsLog[-1] #set back old rights
             self.currentCastlingRight = CastleRights(newRights.wks,newRights.bks,newRights.wqs,newRights.bqs)
+            #getting issue when not using 3rd variable
 
             #undo castle move
             if move.isCastleMove:
@@ -149,9 +150,9 @@ class GameState():
     All moves considering checks
     '''
     def getValidMoves(self):
-        for log in self.castleRightsLog:
-            print(log.wks,log.bks,log.wqs,log.bqs,end=" ,")
-        print()
+        # for log in self.castleRightsLog:
+        #     print(log.wks,log.bks,log.wqs,log.bqs,end=" ,")
+        # print()
         
         tempEnpassantPossible = self.enpassantPossible
         tempCastleRights = CastleRights(self.currentCastlingRight.wks,self.currentCastlingRight.bks,self.currentCastlingRight.wqs,self.currentCastlingRight.bqs)
