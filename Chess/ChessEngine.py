@@ -36,6 +36,7 @@ class GameState():
         self.checkmate = False
         self.stalemate = False
         self.enpassantPossible = () #coordinates for the square where enpassant is possible (row,col)
+        self.enpassantPossibleLog = [self.enpassantPossible]
         self.currentCastlingRight = CastleRights(True,True,True,True)
         self.castleRightsLog = [CastleRights(self.currentCastlingRight.wks,self.currentCastlingRight.bks,
                                             self.currentCastlingRight.wqs,self.currentCastlingRight.bqs)] #history of castling rights used whrn we undo a move
@@ -75,6 +76,9 @@ class GameState():
             else: #queenside castle move
                 self.board[move.endRow][move.endCol+1] = self.board[move.endRow][move.endCol-2] #move the rook
                 self.board[move.endRow][move.endCol-2] = "--" #erase the old rook
+
+
+        self.enpassantPossibleLog.append(self.enpassantPossible)
         
          #update castle rights - whenever it is a rook or a king move
         self.updateCastleRights(move)
@@ -98,12 +102,10 @@ class GameState():
             #undo enpassant move
             if move.isEnpassantMove:
                 self.board[move.endRow][move.endCol] = "--" #leave landing square empty
-                self.board[move.startRow][move.endCol] = move.pieceCaptured
-                self.enpassantPossible = (move.endRow,move.endCol) #reset enpassantPossible back
+                self.board[move.startRow][move.endCol] = move.pieceCaptured #put the piece back to the start square
 
-            #undo 2 square pawn advance
-            if move.pieceMoved[1] == 'p' and abs(move.startRow - move.endRow) == 2:
-                self.enpassantPossible = ()
+            self.enpassantPossibleLog.pop() #poping new enpassant rights
+            self.enpassantPossible = self.enpassantPossibleLog[-1]     
 
             #undo castling rights
             self.castleRightsLog.pop() #poping new castle rights
@@ -145,7 +147,21 @@ class GameState():
                     self.currentCastlingRight.bqs = False
                 elif move.startCol == 7:#right rook
                     self.currentCastlingRight.bks = False
+        ''' If Rook gets captured, then we need to update the castle rights'''
 
+        if move.pieceCaptured == 'wR':
+            if move.endRow == 7:
+                if move.endCol == 0:
+                    self.currentCastlingRight.wqs = False
+                elif move.endCol == 7:
+                    self.currentCastlingRight.wks = False
+        elif move.pieceCaptured == 'bR':
+            if move.endRow == 0:
+                if move.endCol == 0:
+                    self.currentCastlingRight.bqs = False
+                elif move.endCol == 7:
+                    self.currentCastlingRight.bks = False
+        
 
 
     '''
