@@ -4,6 +4,7 @@ Main driver file. Responsible fro handling user input and displaying the current
 
 import pygame as p
 import ChessEngine
+import AI_Moves
 
 
 WIDTH = HEIGHT = 512 # height and width of the window
@@ -43,15 +44,19 @@ def main():
     sqSELECTED = () #no square is selected initially, keep track of last click of user (tuple: (row,col))
     playerClicks = [] #keep track of player clicks (tuple of two positions)
     gameOver = False
+    playerOne = True #if human is playing white, then this is True, if AI is playing then False
+    playerTwo = False #if human is playing black, then this is True, if AI is playing then False
     
     while running:
+        humanTurn = (gs.whiteToMove and playerOne) or (not gs.whiteToMove and playerTwo)
+
         for e in p.event.get():
             if e.type == p.QUIT:
                 running = False
 
             #mouse handler
             elif e.type == p.MOUSEBUTTONDOWN: #mouse is clicked
-                if not gameOver:
+                if not gameOver and humanTurn:
                     location = p.mouse.get_pos() #(x,y) location of mouse
                     col = location[0]//SQ_SIZE   #get column
                     row = location[1]//SQ_SIZE   #get row
@@ -87,6 +92,15 @@ def main():
                     playerClicks = []
                     moveMade = False
                     animate = False
+
+        #AI move finder logic
+        if not gameOver and not humanTurn:
+            AIMove = AI_Moves.findBestMove(gs,validMoves)
+            if AIMove is None:
+                AIMove = AI_Moves.findRandomMove(validMoves)
+            gs.makeMove(AIMove)
+            moveMade = True
+            animate = True
 
         if moveMade: 
             if animate:
@@ -179,14 +193,37 @@ def animateMove(move,screen,board,clock):
         p.display.flip()
         clock.tick(60)
 
-def drawText(screen,text):
-    # print("called")
-    font = p.font.SysFont("Helvitca",32,True,False)
-    textObject = font.render(text,0,p.Color('Gray'))
-    textLocation = p.Rect(0,0,WIDTH,HEIGHT).move(WIDTH/2 - textObject.get_width()/2,HEIGHT/2 - textObject.get_height()/2)
-    screen.blit(textObject,textLocation)
-    textObject = font.render(text,0,p.Color('Black'))
-    screen.blit(textObject,textLocation.move(2,2))
+def drawText(screen, text):
+    # Define colors
+    text_color = p.Color('White')
+    shadow_color = p.Color('Black')
+    background_color = p.Color('Gray')
+    background_alpha = 128
+
+    # Set up the font
+    font = p.font.SysFont("Helvetica", 32, True, False)
+
+    # Render the text
+    text_object = font.render(text, True, text_color)
+    shadow_object = font.render(text, True, shadow_color)
+
+    # Get the size and position of the text
+    text_rect = text_object.get_rect(center=(WIDTH / 2, HEIGHT / 2))
+    shadow_rect = shadow_object.get_rect(center=(WIDTH / 2 + 2, HEIGHT / 2 + 2))
+
+    # Create a background surface with transparency
+    background_surface = p.Surface((text_rect.width + 20, text_rect.height + 20), p.SRCALPHA)
+    background_surface.fill((0, 0, 0, 0))
+    p.draw.rect(background_surface, background_color, background_surface.get_rect(), border_radius=10)
+    background_surface.set_alpha(background_alpha)
+
+    # Position the background
+    background_rect = background_surface.get_rect(center=(WIDTH / 2, HEIGHT / 2))
+
+    # Blit everything onto the screen
+    screen.blit(background_surface, background_rect)
+    screen.blit(shadow_object, shadow_rect)
+    screen.blit(text_object, text_rect)
 
 if __name__ == "__main__":
     main()
