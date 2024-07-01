@@ -44,7 +44,7 @@ def main():
     sqSELECTED = () #no square is selected initially, keep track of last click of user (tuple: (row,col))
     playerClicks = [] #keep track of player clicks (tuple of two positions)
     gameOver = False
-    playerOne = True #if human is playing white, then this is True, if AI is playing then False
+    playerOne = False #if human is playing white, then this is True, if AI is playing then False
     playerTwo = False #if human is playing black, then this is True, if AI is playing then False
     
     while running:
@@ -95,9 +95,9 @@ def main():
                     animate = False
                     gameOver = False
 
-        #AI move finder logic
+        '''AI move finder logic'''
         if not gameOver and not humanTurn:
-            AIMove = AI_Moves.findBestMove(gs,validMoves)
+            AIMove = AI_Moves.findBestMoveMinMax(gs,validMoves)
             if AIMove is None:
                 AIMove = AI_Moves.findRandomMove(validMoves)
             gs.makeMove(AIMove)
