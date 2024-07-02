@@ -399,6 +399,8 @@ class Move():
         #castle move
         self.isCastleMove = isCastleMove
 
+        self.isCapture = self.pieceCaptured != "--"
+
         self.moveId = self.startRow*1000 + self.startCol*100 + self.endRow*10 + self.endCol
         # print(self.moveId)
 
@@ -417,3 +419,23 @@ class Move():
     def getRankFile(self,r,c):
         return self.colsToFiles[c] + self.rowsToRanks[r]
     
+
+    #overriding the string method
+    def __str__(self):
+        #castle move
+        if self.isCastleMove:
+            return "O-O" if self.endCol == 6 else "O-O-O"
+        endSquare = self.getRankFile(self.endRow,self.endCol)
+        #pawn moves
+        if self.pieceMoved[1] == 'p':
+            if self.isCapture:
+                return self.colsToFiles[self.startCol] + "X" + endSquare
+            else:
+                return endSquare
+            
+        #two of the same type of pieces can move to the same square
+
+        moveString = self.pieceMoved[1]
+        if self.isCapture:
+            moveString += "x"
+        return moveString + endSquare
